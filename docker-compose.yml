@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "market"
+      POSTGRES_USER: "marketAdmin"
+      POSTGRES_PASSWORD: "pddpwd4asds"
+    restart: always
+    networks:
+      - postgres_bridge
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+
+  test_api:
+    image: ${DOCKER_REGISTRY-}testapi
+    build:
+      context: .
+      dockerfile: Test_API/Dockerfile
+    restart: always
+    networks:
+      - postgres_bridge
+    ports:
+
+      - "8090:80"
+      - "8091:443"
+    depends_on:
+      - postgres
+
+networks:
+  postgres_bridge:
+    driver: bridge
+

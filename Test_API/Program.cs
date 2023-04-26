@@ -49,14 +49,13 @@ internal class Program
 
         var app = builder.Build();
         app.AddSettings();
-        if (app.Environment.IsDevelopment())
+
+        app.UseSwagger(options =>
         {
-            app.UseSwagger(options =>
-            {
-                options.SerializeAsV2 = true;
-            });
-            app.UseSwaggerUI();
-        }
+            options.SerializeAsV2 = true;
+        });
+        app.UseSwaggerUI();
+
 
         app.UseHttpsRedirection();
 
