@@ -1,18 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System;
-using Test_API.Infrastructure;
-using Test_API.Models.Orders.DbDTO;
 using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Runtime.Serialization;
-using Microsoft.OpenApi.Validations.Rules;
-using System.ComponentModel;
+using Test_API.Models.Orders.Api;
 
-namespace Test_API.Models.Orders.Api
+namespace Test_API.Models.Orders.DTO.Api
 {
-    [SwaggerSchema("Order", Format = "object",Title = "Order")]
+    [SwaggerSchema("Order", Format = "object", Title = "Order")]
     public class FullOrderApiDTO
     {
         [JsonProperty(PropertyName = "id")]

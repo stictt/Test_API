@@ -1,6 +1,4 @@
-﻿using Test_API.Infrastructure;
-
-namespace Test_API.Models.Orders.DbDTO
+﻿namespace Test_API.Models.Orders.DTO.Db
 {
     public class OrderDTO
     {

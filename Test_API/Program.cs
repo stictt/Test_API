@@ -1,19 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 using Test_API.Models;
 using Test_API.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Net;
-using Test_API.Models.Orders.Api;
-using Microsoft.Extensions.Options;
-using Microsoft.CodeAnalysis.Options;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using PrimaryAggregatorService.Infrastructure;
+using Test_API.Infrastructure;
 
 internal class Program
 {
@@ -39,6 +29,8 @@ internal class Program
             options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         builder.Services.AddScoped<DatabaseService>();
+        builder.Services.AddScoped<OrderRepository>();
+        builder.Services.AddScoped<OrderValidationService>();
 
 
         builder.Services.AddLogging(loggingBuilder =>
@@ -48,6 +40,16 @@ internal class Program
         });
 
         var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/error");
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
+        }
         app.AddSettings();
 
         app.UseSwagger(options =>

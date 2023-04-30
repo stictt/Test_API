@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
-using Test_API.Models.Orders.DbDTO;
 
 namespace Test_API.Models.Orders.Api
 {

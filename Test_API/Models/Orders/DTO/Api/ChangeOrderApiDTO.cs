@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
 using System.ComponentModel.DataAnnotations;
-using Test_API.Infrastructure;
-using Test_API.Models.Orders.DbDTO;
+using Test_API.Models.Orders.Api;
 
-namespace Test_API.Models.Orders.Api
+namespace Test_API.Models.Orders.DTO.Api
 {
     [SwaggerSchema("Change", Format = "object", Title = "ChangeOrder")]
     public class ChangeOrderApiDTO

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Test_API.Models.Orders.DbDTO
+namespace Test_API.Models.Orders.DTO.Db
 {
     public class ProductDTO
     {

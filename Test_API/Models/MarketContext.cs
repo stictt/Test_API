@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Test_API.Infrastructure;
-using Test_API.Models.Orders.DbDTO;
+using Test_API.Models.Orders;
+using Test_API.Models.Orders.DTO.Db;
 
 namespace Test_API.Models
 {

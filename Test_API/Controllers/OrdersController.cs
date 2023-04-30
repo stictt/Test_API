@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.Annotations;
-using System.Net;
-using Test_API.Infrastructure.Exceptions;
+﻿using Microsoft.AspNetCore.Mvc;
+using Test_API.Infrastructure;
 using Test_API.Models.Orders.Api;
+using Test_API.Models.Orders.DTO.Api;
 using Test_API.Services;
 
 namespace Test_API.Controllers
@@ -13,10 +10,12 @@ namespace Test_API.Controllers
     [ApiController]
     public class OrdersController : Controller
     {
-        private readonly DatabaseService _database;
-        public OrdersController(DatabaseService database) 
+        private readonly DatabaseService _databaseService;
+        private readonly OrderValidationService _orderValidationService;
+        public OrdersController(DatabaseService database, OrderValidationService validationService) 
         {
-            _database = database;
+            _databaseService = database;
+            _orderValidationService = validationService;
         }
 
         [HttpGet("{id}")]
@@ -24,32 +23,24 @@ namespace Test_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<FullOrderApiDTO>> GetOrder(Guid id)
         {
-            try
-            {
-                return await _database.GetOrderAsync(id);
-            }
-            catch(NotFoundException e){ return NotFound(); }
-            catch
-            {
-                return StatusCode(500);
-            }
+            var order = await _databaseService.GetOrderAsync(id, false);
+
+            if (order == null) { return NotFound(); }
+
+            return OrderMapper.MapingOrderToFullOrderApiDTO(order);
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            try
-            {
-                await _database.DeleteOrderAsync(id);
-                return Ok();
-            }
-            catch (NotFoundException e){ return NotFound(); }
-            catch
-            {
-                return StatusCode(500);
-            }
+            var order = await _databaseService.GetOrderAsync(id, false);
+            if (order == null) { return NotFound(); }
+            if (!_orderValidationService.IsAvailabilityChanges(order)) { return StatusCode(403); }
+            await _databaseService.DeleteOrderAsync(id);
+            return Ok();
         }
 
         [HttpPut("{id}")]
@@ -59,37 +50,33 @@ namespace Test_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<FullOrderApiDTO>> PutOrder(Guid id, ChangeOrderApiDTO changeOrder)
         {
-            try
-            {
-                return await _database.ChangeOrderAsync(id, changeOrder);
-            }
-            catch (NotFoundException e){ return NotFound(); }
-            catch (BadRequestException e){ return BadRequest(); }
-            catch (ForbiddenException e) { return StatusCode(403); }
-            catch
-            {
-                return StatusCode(500);
-            }
+            var order = await _databaseService.GetOrderAsync(id,false);
+            if (order == null) { return NotFound(); }
+
+            var change = OrderMapper.MapingChangeOrderApiDtoToOrder(changeOrder);
+
+            if (!_orderValidationService.IsAvailabilityChanges(order)) { return StatusCode(403); }
+            if (!_orderValidationService.IsValidOrder(change)) { return BadRequest(); }
+
+            var tempOrder = await _databaseService
+                .ChangeOrderAsync(OrderMapper.MapingChangeOrderApiDtoToOrder(changeOrder), order);
+            return OrderMapper.MapingOrderToFullOrderApiDTO(tempOrder);
         }
-
-
 
         [HttpPost("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<FullOrderApiDTO>> PostOrder(CreateOrderApiDTO order)
+        public async Task<ActionResult<FullOrderApiDTO>> PostOrder(CreateOrderApiDTO orderCreate)
         {
-            try
-            {
-                return await _database.CreateOrderAsync(order);
-            }
-            catch (BadRequestException e) { return BadRequest(); }
-            catch (ConflictException e){ return Conflict(); }
-            catch
-            {
-                return StatusCode(500);
-            }
+            var order = await _databaseService.GetOrderAsync(orderCreate.Id, false);
+            if (order != null) { return Conflict(); }
+
+            order = OrderMapper.MapingCreateOrderApiDtoToOrder(orderCreate);
+            if (!_orderValidationService.IsValidOrder(order)) { return BadRequest(); }
+
+            var tempOrder = await _databaseService.CreateOrderAsync(order);
+            return OrderMapper.MapingOrderToFullOrderApiDTO(tempOrder);
         }
     }
 }

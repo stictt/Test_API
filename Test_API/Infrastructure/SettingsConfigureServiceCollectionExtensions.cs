@@ -1,5 +1,4 @@
-﻿
-using Test_API.Models;
+﻿using Test_API.Models;
 
 namespace PrimaryAggregatorService.Infrastructure
 {

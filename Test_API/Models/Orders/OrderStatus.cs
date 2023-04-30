@@ -1,9 +1,6 @@
-﻿using Microsoft.SqlServer.Server;
-using Newtonsoft.Json;
-using Swashbuckle.AspNetCore.Annotations;
-using System.Runtime.Serialization;
+﻿using Swashbuckle.AspNetCore.Annotations;
 
-namespace Test_API.Infrastructure
+namespace Test_API.Models.Orders
 {
     [SwaggerSchema("enum", Format = "object", Title = "Status")]
     public enum OrderStatus
