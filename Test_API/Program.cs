@@ -4,6 +4,7 @@ using Test_API.Services;
 using System.Text.Json.Serialization;
 using PrimaryAggregatorService.Infrastructure;
 using Test_API.Infrastructure;
+using Test_API.Infrastructure.Interfaces;
 
 internal class Program
 {
@@ -28,9 +29,9 @@ internal class Program
         builder.Services.AddDbContext<MarketContext>(
             options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        builder.Services.AddScoped<DatabaseService>();
-        builder.Services.AddScoped<OrderRepository>();
-        builder.Services.AddScoped<OrderValidationService>();
+        builder.Services.AddScoped<IOrderBusinessLogic, DatabaseService>();
+        builder.Services.AddScoped<IOrderDataBase, OrderRepository>();
+        builder.Services.AddScoped<IValidationOrder, OrderValidationService>();
 
 
         builder.Services.AddLogging(loggingBuilder =>

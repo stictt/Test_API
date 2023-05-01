@@ -21,6 +21,19 @@ namespace Test_API.Infrastructure
             return mapper.Map<Order>(orderDTO);
         }
 
+        public static FullOrderApiDTO MapingOrderDtoToFullOrderApiDTO(OrderDTO orderDTO)
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<OrderDTO, FullOrderApiDTO>()
+                        .ForMember(x => x.Products,
+                            y => y.MapFrom(s => s.Products));
+                cfg.CreateMap<ProductDTO, ProductApiDTO>();
+            });
+            var mapper = config.CreateMapper();
+            return mapper.Map<FullOrderApiDTO>(orderDTO);
+        }
+
         public static OrderDTO MapingOrderToOrderDTO(Order order)
         {
             var config = new MapperConfiguration(cfg =>
@@ -45,6 +58,19 @@ namespace Test_API.Infrastructure
             });
             var mapper = config.CreateMapper();
             return mapper.Map<FullOrderApiDTO>(order);
+        }
+
+        public static Order MapingFullOrderApiDtoToOrder(FullOrderApiDTO order)
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<FullOrderApiDTO, Order>()
+                        .ForMember(x => x.Products,
+                            y => y.MapFrom(s => s.Products));
+                cfg.CreateMap<ProductApiDTO, Product>();
+            });
+            var mapper = config.CreateMapper();
+            return mapper.Map<Order>(order);
         }
 
         public static Order MapingCreateOrderApiDtoToOrder(CreateOrderApiDTO createOrder)
@@ -78,6 +104,16 @@ namespace Test_API.Infrastructure
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Product, ProductDTO>();
+            });
+            var mapper = config.CreateMapper();
+            return mapper.Map<ProductDTO>(product);
+        }
+
+        public static ProductDTO MapingProductApiDtoToProductDto(ProductApiDTO product)
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductApiDTO, ProductDTO>();
             });
             var mapper = config.CreateMapper();
             return mapper.Map<ProductDTO>(product);

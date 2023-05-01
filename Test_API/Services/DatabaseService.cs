@@ -1,28 +1,31 @@
 ﻿using System;
 using Test_API.Infrastructure;
+using Test_API.Infrastructure.Interfaces;
 using Test_API.Models.Orders;
+using Test_API.Models.Orders.Api;
+using Test_API.Models.Orders.DTO.Api;
 
 namespace Test_API.Services
 {
 #pragma warning disable CS8600 // Преобразование литерала, допускающего значение NULL или возможного значения NULL в тип, не допускающий значение NULL.
 
-    public class DatabaseService
+    public class DatabaseService : IOrderBusinessLogic
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly IOrderDataBase _orderRepository;
         private readonly ILogger _logger;
-        public DatabaseService(OrderRepository orderRepository,ILoggerFactory loggerFactory) 
+        public DatabaseService(IOrderDataBase orderRepository,ILoggerFactory loggerFactory) 
         {
             _orderRepository = orderRepository;
             _logger = loggerFactory.CreateLogger<DatabaseService>();
         }
 
-        public async Task<Order> GetOrderAsync(Guid guid,bool tracking = true)
+        public async Task<FullOrderApiDTO> GetOrderAsync(Guid guid,bool tracking = true)
         {
             try
             {
-                var temp = await _orderRepository.GetOrderAsync(guid, tracking);
-                if (temp == null) { return null; }
-                return OrderMapper.MapingOrderDtoToOrder(temp);
+                var order = await _orderRepository.GetOrderAsync(guid, tracking);
+                if (order == null) { return null; }
+                return OrderMapper.MapingOrderDtoToFullOrderApiDTO(order);
             }
             catch (Exception ex)
             {
@@ -31,14 +34,16 @@ namespace Test_API.Services
             }
         }
 
-        public async Task<Order> CreateOrderAsync(Order order)
+        public async Task<FullOrderApiDTO> CreateOrderAsync(CreateOrderApiDTO createOrder)
         {
             try
             {
+                var order = OrderMapper.MapingCreateOrderApiDtoToOrder(createOrder);
+
                 order.Status = OrderStatus.New;
                 order.Created = DateTime.Now.ToUniversalTime();
                 await _orderRepository.CreateOrderAsync(OrderMapper.MapingOrderToOrderDTO(order));
-                return order;
+                return OrderMapper.MapingOrderToFullOrderApiDTO(order);
             }
             catch(Exception ex)
             {
@@ -47,20 +52,18 @@ namespace Test_API.Services
             }
         }
 
-        public async Task<Order> ChangeOrderAsync(Order order, Order oldOrder)
+        public async Task<FullOrderApiDTO> ChangeOrderAsync(ChangeOrderApiDTO changeOrder, Guid oldOrderId)
         {
             try
             {
-                var temp = await _orderRepository.GetOrderAsync(oldOrder.Id);
-                temp.Products.Clear();
-                temp.Id = oldOrder.Id;
-                temp.Created = oldOrder.Created;
-                temp.Status = order.Status;
-                temp.Products = order.Products
-                    .Select(x=> OrderMapper.MapingProductToProductDTO(x))
+                var order = await _orderRepository.GetOrderAsync(oldOrderId);
+                order.Products.Clear();
+                order.Status = changeOrder.Status;
+                order.Products = changeOrder.Products
+                    .Select(x=> OrderMapper.MapingProductApiDtoToProductDto(x))
                     .ToList();
-                await _orderRepository.ChangeOrderAsync(temp);
-                return OrderMapper.MapingOrderDtoToOrder(temp);
+                await _orderRepository.ChangeOrderAsync(order);
+                return OrderMapper.MapingOrderDtoToFullOrderApiDTO(order);
             }
             catch (Exception ex)
             {

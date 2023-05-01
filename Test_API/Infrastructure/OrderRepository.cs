@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Test_API.Infrastructure.Interfaces;
 using Test_API.Models;
 using Test_API.Models.Orders.DTO.Db;
 
 namespace Test_API.Infrastructure
 {
-    public class OrderRepository
+    public class OrderRepository : IOrderDataBase
     {
         #pragma warning disable CS8603 // Преобразование литерала, допускающего значение NULL или возможного значения NULL в тип, не допускающий значение NULL.
         private readonly MarketContext _marketContext;
